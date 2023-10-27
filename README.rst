@@ -21,6 +21,6 @@ Python versions that are not supported by the version of Sopel you are using.
 Notes
 =====
 
-This plugin replaces a built-in Sopel plugin formerly called `ip`, you may need
-to update your bot configuration to replace `ip` with `iplookup` if you are e.g.
+This plugin replaces a built-in Sopel plugin formerly called ``ip``, you may need
+to update your bot configuration to replace ``ip`` with ``iplookup`` if you are e.g.
 excluding this plugin.
