@@ -31,10 +31,13 @@ def configure(config: Config):
     | name | example | purpose |
     | ---- | ------- | ------- |
     | GeoIP\\_db\\_path | /home/sopel/GeoIP/ | Path to the GeoIP database files |
+    | maxmind_license_key | random_ascii_str | License key for DB downloads |
     """
     config.define_section('ip', GeoipSection)
     config.ip.configure_setting('GeoIP_db_path',
                                 'Path of the GeoIP db files')
+    config.ip.configure_setting('maxmind_license_key',
+                                'Custom MaxMind license key')
 
 
 def setup(bot: Sopel):
@@ -87,7 +90,10 @@ def _find_geoip_db(bot: SopelWrapper):
     LOGGER.info('Downloading GeoIP database')
     bot.say('Downloading GeoIP database, please wait...')
 
-    common_params = {'license_key': 'JXBEmLjOzislFnh4', 'suffix': 'tar.gz'}
+    common_params = {
+        'license_key': config.ip.maxmind_license_key,
+        'suffix': 'tar.gz',
+    }
     base_url = 'https://download.maxmind.com/app/geoip_download'
     geolite_urls = []
 
