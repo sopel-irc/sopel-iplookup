@@ -30,7 +30,7 @@ def configure(config: Config):
     """
     | name | example | purpose |
     | ---- | ------- | ------- |
-    | GeoIP\\_db\\_path | /home/sopel/GeoIP/ | Path to the GeoIP database files |
+    | GeoIP\\_db\\_path | /home/sopel/GeoIP/ | Path to GeoIP database files |
     """
     config.define_section('ip', GeoipSection)
     config.ip.configure_setting('GeoIP_db_path',
@@ -77,9 +77,11 @@ def _find_geoip_db(bot: SopelWrapper):
             return pth
         else:
             if not city_db_found:
-                LOGGER.debug("City database file %s does not exist", str(city_db))
+                LOGGER.debug(
+                    "City database file %s does not exist", str(city_db))
             if not asn_db_found:
-                LOGGER.debug("ASN database file %s does not exist", str(asn_db))
+                LOGGER.debug(
+                    "ASN database file %s does not exist", str(asn_db))
             if pth == config.ip.GeoIP_db_path:
                 LOGGER.warning(
                     'GeoIP path configured but DB not found in %s', str(pth))
@@ -95,7 +97,10 @@ def _find_geoip_db(bot: SopelWrapper):
         geolite_urls.append(
             '{base}?{params}'.format(
                 base=base_url,
-                params=web.urlencode(dict(common_params, **{'edition_id': 'GeoLite2-%s' % edition})),
+                params=web.urlencode(dict(
+                    common_params,
+                    **{'edition_id': 'GeoLite2-%s' % edition}
+                )),
             )
         )
 
@@ -147,7 +152,8 @@ def ip(bot: SopelWrapper, trigger: Trigger):
     db_path = _find_geoip_db(bot)
     if db_path is False:
         LOGGER.error('Can\'t find (or download) usable GeoIP database.')
-        bot.reply('Sorry, I don\'t have a GeoIP database to use for this lookup.')
+        bot.reply(
+            'Sorry, I don\'t have a GeoIP database to use for this lookup.')
         return
 
     if ':' in query:
