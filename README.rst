@@ -18,6 +18,27 @@ The recommended way to install this plugin is to use ``pip``::
 Note that this plugin requires Python 3.7+ and Sopel 7.1+. It won't work on
 Python versions that are not supported by the version of Sopel you are using.
 
+Configure
+=========
+
+``sopel-iplookup`` can be configured by invoking Sopel's interactive wizard::
+
+    $ sopel-plugins configure iplookup
+    Configure Sopel GeoIP Lookup Plugin
+    Please consult sopel-iplookup's README to learn about its settings.
+
+    Path to existing GeoIP db files (leave empty to auto download): 
+    MaxMind license key (optional): (hidden input)
+
+If your OS distribution has GeoIP database files installed already, you can
+provide a filesystem path to the folder where they are stored. The plugin will
+auto-download the database files if it cannot find them locally.
+
+By default, GeoIP database downloads will use an automated mirror on GitHub. You
+can optionally provide your own MaxMind license key and the plugin will download
+directly from them—useful in case the mirror breaks, or if you would simply like
+to get database files from the source.
+
 Notes
 =====
 
