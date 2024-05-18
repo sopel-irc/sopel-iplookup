@@ -95,7 +95,7 @@ def _find_geoip_db(bot: SopelWrapper):
                 LOGGER.warning(
                     'GeoIP path configured but DB not found in %s', str(pth))
 
-    LOGGER.info('Downloading GeoIP database')
+    LOGGER.info('Downloading GeoIP database files')
     bot.say('Downloading GeoIP database, please wait...')
 
     geolite_urls = []
@@ -146,6 +146,7 @@ def _find_geoip_db(bot: SopelWrapper):
             # (the `suffix=tar.gz` parameter)
             _decompress_targz(full_path, config.core.homedir)
 
+    LOGGER.info('GeoIP database downloads complete')
     return config.core.homedir
 
 
