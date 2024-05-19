@@ -12,6 +12,7 @@ import os
 import socket
 import tarfile
 from pathlib import Path
+from typing import Generator, Iterable, Optional
 from urllib.error import HTTPError
 from urllib.request import urlretrieve
 
@@ -53,20 +54,71 @@ def setup(bot: Sopel):
     bot.config.define_section('ip', GeoipSection)
 
 
-def _decompress_targz(
+def _maybe_decompress_targz(
     source: str,
     target: str,
     delete_after_decompression: bool = True
 ):
-    """Decompress just the database from the archive"""
+    """Decompress database from the archive, ignoring non-archive files.
+
+    If the file is a ``tarfile``-compatible archive, extract from it any members
+    named ``*.mmdb``, and delete the original file if requested.
+
+    If the file is NOT an archive, do nothing.
+    """
     # https://stackoverflow.com/a/16452962
-    tar = tarfile.open(source)
+    try:
+        tar = tarfile.open(source)
+    except tarfile.ReadError:
+        # not an archive; leave it alone
+        return
+
     for member in tar.getmembers():
         if ".mmdb" in member.name:
             member.name = os.path.basename(member.name)
             tar.extract(member, target)
     if delete_after_decompression:
         os.remove(source)
+
+
+def _build_download_urls(
+    editions: Iterable[str],
+    license_key: Optional[str] = None,
+) -> Generator[str, None, None]:
+    """Yield download URLs, one for each of the requested ``editions``.
+
+    Builds MaxMind download URLs if the ``license_key`` is truthy; otherwise
+    uses an automated GitHub mirror.
+    """
+    if license_key:
+        # Direct downloads via MaxMind account
+        base_url = 'https://download.maxmind.com/app/geoip_download'
+        common_params = {
+            'license_key': license_key,
+            'suffix': 'tar.gz',
+        }
+
+        for edition in editions:
+            yield (
+                '{base}?{params}'.format(
+                    base=base_url,
+                    params=web.urlencode(
+                        dict(
+                            common_params,
+                            **{'edition_id': 'GeoLite2-%s' % edition}
+                        )
+                    ),
+                )
+            )
+    else:
+        # Indirect downloads with no key needed
+        base_url = (
+            'https://raw.githubusercontent.com'
+            '/P3TERX/GeoLite.mmdb/download/GeoLite2-{edition}.mmdb'
+        )
+
+        for edition in editions:
+            yield base_url.format(edition=edition)
 
 
 def _find_geoip_db(bot: SopelWrapper):
@@ -98,53 +150,21 @@ def _find_geoip_db(bot: SopelWrapper):
     LOGGER.info('Downloading GeoIP database files')
     bot.say('Downloading GeoIP database, please wait...')
 
-    geolite_urls = []
     editions = ['ASN', 'City']
-
-    if config.ip.maxmind_license_key:
-        # Direct downloads via MaxMind account
-        base_url = 'https://download.maxmind.com/app/geoip_download'
-        common_params = {
-            'license_key': config.ip.maxmind_license_key,
-            'suffix': 'tar.gz',
-        }
-
-        for edition in editions:
-            geolite_urls.append(
-                '{base}?{params}'.format(
-                    base=base_url,
-                    params=web.urlencode(
-                        dict(
-                            common_params,
-                            **{'edition_id': 'GeoLite2-%s' % edition}
-                        )
-                    ),
-                )
-            )
-    else:
-        # Indirect downloads with no key needed
-        base_url = (
-            'https://raw.githubusercontent.com'
-            '/P3TERX/GeoLite.mmdb/download/GeoLite2-{edition}.mmdb'
-        )
-
-        for edition in editions:
-            geolite_urls.append(
-                base_url.format(edition=edition)
-            )
+    geolite_urls = _build_download_urls(editions, config.ip.maxmind_license_key)
 
     for url in geolite_urls:
         LOGGER.debug('GeoIP Source URL: %s', url)
         full_path = os.path.join(config.core.homedir, url.split("/")[-1])
+
         try:
             urlretrieve(url, full_path)
         except HTTPError as err:
             LOGGER.error("Aborting GeoIP database download: %s", err)
             return False
-        if config.ip.maxmind_license_key:
-            # MaxMind serves the files compressed because we ask for it
-            # (the `suffix=tar.gz` parameter)
-            _decompress_targz(full_path, config.core.homedir)
+
+        # MaxMind serves the files compressed, but the GH mirror doesn't
+        _maybe_decompress_targz(full_path, config.core.homedir)
 
     LOGGER.info('GeoIP database downloads complete')
     return config.core.homedir
