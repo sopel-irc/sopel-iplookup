@@ -30,14 +30,14 @@ Configure
     Path to existing GeoIP db files (leave empty to auto download): 
     MaxMind license key (optional): (hidden input)
 
-If your OS distribution has GeoIP database files installed already, you can
-provide a filesystem path to the folder where they are stored. The plugin will
-auto-download the database files if it cannot find them locally.
+By default, ``sopel-iplookup`` will look in a few standard locations for GeoIP
+database files. If it can't find existing database files, it will download them
+from an automated mirror on GitHub.
 
-By default, GeoIP database downloads will use an automated mirror on GitHub. You
-can optionally provide your own MaxMind license key and the plugin will download
-directly from them—useful in case the mirror breaks, or if you would simply like
-to get database files from the source.
+You can optionally provide your own MaxMind license key, and the plugin will
+download directly from them instead. Alternatively, if your OS distribution
+already has GeoIP database files kept up-to-date by the system package manager,
+you can provide the path where those files are stored.
 
 Notes
 =====
