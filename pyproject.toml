@@ -9,6 +9,9 @@ platforms = ["Linux x86, x86-64"]
 include = ["sopel_iplookup", "sopel_iplookup.*"]
 namespaces = false
 
+[tool.setuptools.dynamic]
+readme = { file=["README.rst", "NEWS"], content-type="text/x-rst" }
+
 [project]
 name = "sopel-iplookup"
 version = "1.0.0"
@@ -32,7 +35,7 @@ authors = [
   { name="SnoopJ", email="snoopjedi@gmail.com" },
 ]
 
-readme = "README.rst"
+dynamic = ["readme"]
 license = { text="EFL-2.0" }
 classifiers = [
     "Development Status :: 4 - Beta",
