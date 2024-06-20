@@ -16,10 +16,9 @@ class GeoipSection(StaticSection):
     to the directory containing the config file with which Sopel was started.
     """
 
-    maxmind_license_key = SecretAttribute(
-        'maxmind_license_key', default='JXBEmLjOzislFnh4')
+    maxmind_license_key = SecretAttribute('maxmind_license_key', default=None)
     """License key for downloading GeoIP database files from MaxMind.
 
-    The plugin ships with a default key, but this option is available in case
-    overriding the inbuilt key is desired or required.
+    The plugin downloads from a keyless source by default, but this option is
+    available if you wish to download the files using your own MaxMind account.
     """
