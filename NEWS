@@ -1,6 +1,17 @@
 Changelog
 =========
 
+
+1.1.0
+-----
+
+* plugin, config: add config field for MaxMind license key (#4, #5)
+    * If no MaxMind key is provided, the plugin will download from a mirror of
+      the .mmdb files on GitHub. With a license key, the plugin downloads directly
+      from MaxMind.
+* plugin: slightly better logging during/after DB downloads
+* meta: add automated release workflow using PyPI Trusted Publishing (#7)
+
 1.0.0
 -----
 
